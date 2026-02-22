@@ -23,6 +23,9 @@ This infrastructure stack includes the following services, each housed in its re
 - **OpenSearch**: Search and analytics engine (`opensearch/`)
 - **Portainer**: Graphical container management (`portainer/`)
 - **SigNoz**: Open-source Observability and tracing (`signoz/`)
+- **SonarQube**: Continuous inspection of code quality and security (`sonarqube/`)
+- **Vault**: Secrets and identity management (`vault/`)
+- **Ngrok**: Ingress to local applications (`ngrok/`)
 
 ## Usage
 

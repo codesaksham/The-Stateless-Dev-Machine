@@ -1,0 +1,13 @@
+services:
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: ngrok
+    environment:
+      # You need to configure this authtoken in a .env file or replace it here!
+      # Get it from dashboard.ngrok.com
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN:-your_auth_token_here}
+    command:
+      - http
+      - traefik:80 # Points ngrok to the Traefik proxy as an example!
+    ports:
+      - "4040:4040" # Ngrok web inspect interface
