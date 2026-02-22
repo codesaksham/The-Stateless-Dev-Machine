@@ -15,6 +15,14 @@ This infrastructure stack includes the following services, each housed in its re
 - **Kafka**: Distributed event streaming platform (`kafka/`)
 - **Celery**: Distributed task queue (`celery/`)
 - **MinIO**: High-performance, S3-compatible object storage (`minio/`)
+- **LocalStack**: AWS Cloud mock (`localstack/`)
+- **MailPit**: Email testing and SMTP mock (`mailpit/`)
+- **Keycloak**: Identity and Access Management (`keycloak/`)
+- **Dozzle**: Real-time web-based Docker log viewer (`dozzle/`)
+- **Traefik**: Modern reverse proxy and load balancer (`traefik/`)
+- **OpenSearch**: Search and analytics engine (`opensearch/`)
+- **Portainer**: Graphical container management (`portainer/`)
+- **SigNoz**: Open-source Observability and tracing (`signoz/`)
 
 ## Usage
 

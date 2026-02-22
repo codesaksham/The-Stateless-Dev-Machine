@@ -4,7 +4,7 @@
 # Run this script with: sudo ./test_infra.sh
 
 BASE_DIR="/home/zindagi/Desktop/DevEnv/INFRA"
-SERVICES=("postgres" "mongo" "redis" "rabbitmq" "kafka" "pgadmin" "compass-mongo" "celery")
+SERVICES=("postgres" "mongo" "redis" "rabbitmq" "kafka" "pgadmin" "compass-mongo" "celery" "localstack" "mailpit" "keycloak" "dozzle" "traefik" "opensearch" "portainer")
 
 echo "==========================================="
 echo "   Infrastructure Health Check Tool        "
