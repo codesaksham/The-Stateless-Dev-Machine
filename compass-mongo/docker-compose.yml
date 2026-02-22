@@ -1,0 +1,11 @@
+services:
+  compass-mongo:
+    image: haohanyang/compass-web
+    container_name: compass-mongo
+    restart: always
+    environment:
+      - CW_MONGO_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME:-admin}:${MONGO_INITDB_ROOT_PASSWORD:-password}@host.docker.internal:27017
+    ports:
+      - "17017:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

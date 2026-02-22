@@ -1,0 +1,22 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Docker
+docker-compose.override.yml
+*.log
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.swp
+*~
+.DS_Store
+
+# Virtual Environments (just in case python is used for scripts)
+venv/
+env/
+.venv/
+__pycache__/
+*.pyc

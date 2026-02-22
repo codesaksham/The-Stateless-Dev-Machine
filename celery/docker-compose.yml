@@ -1,0 +1,11 @@
+services:
+  flower:
+    image: mher/flower
+    container_name: celery-flower
+    restart: always
+    environment:
+      - CELERY_BROKER_URL=amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@host.docker.internal:5672
+    ports:
+      - "5555:5555"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
