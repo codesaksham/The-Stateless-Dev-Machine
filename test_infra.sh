@@ -4,7 +4,7 @@
 # Run this script with: sudo ./test_infra.sh
 
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SERVICES=("postgres" "mongo" "redis" "rabbitmq" "kafka" "pgadmin" "compass-mongo" "celery" "localstack" "mailpit" "keycloak" "dozzle" "traefik" "opensearch" "portainer" "vault" "sonarqube" "ngrok")
+SERVICES=("postgres" "mongo" "redis" "rabbitmq" "kafka" "pgadmin" "compass-mongo" "celery" "localstack" "mailpit" "keycloak" "dozzle" "traefik" "opensearch" "portainer" "vault" "sonarqube" "ngrok" "postwoman-hoppscotch")
 
 echo "==========================================="
 echo "   Infrastructure Health Check Tool        "

@@ -1,0 +1,7 @@
+services:
+  hoppscotch:
+    image: hoppscotch/hoppscotch:latest
+    container_name: hoppscotch
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
