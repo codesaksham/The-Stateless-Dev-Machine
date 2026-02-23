@@ -63,14 +63,14 @@ run_compose() {
     
     case $action in
         start)
-            sudo docker compose -f "$compose_file" up -d
+            sudo docker compose -f "$compose_file" up -d --build --force-recreate
             ;;
         stop)
             sudo docker compose -f "$compose_file" down
             ;;
         restart)
             sudo docker compose -f "$compose_file" down
-            sudo docker compose -f "$compose_file" up -d
+            sudo docker compose -f "$compose_file" up -d --build --force-recreate
             ;;
     esac
 }

@@ -3,7 +3,7 @@
 # This script verifies that all infrastructure services are working correctly.
 # Run this script with: sudo ./test_infra.sh
 
-BASE_DIR="/home/zindagi/Desktop/DevEnv/INFRA"
+BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SERVICES=("postgres" "mongo" "redis" "rabbitmq" "kafka" "pgadmin" "compass-mongo" "celery" "localstack" "mailpit" "keycloak" "dozzle" "traefik" "opensearch" "portainer" "vault" "sonarqube" "ngrok")
 
 echo "==========================================="
@@ -16,7 +16,7 @@ DOCKER_COMPOSE="docker compose"
 for service in "${SERVICES[@]}"; do
     echo "[+] Starting $service..."
     cd "$BASE_DIR/$service" || continue
-    $DOCKER_COMPOSE up -d > /dev/null 2>&1
+    $DOCKER_COMPOSE up -d --build --force-recreate > /dev/null 2>&1
 done
 
 echo "[*] Waiting 20 seconds for initialization..."
