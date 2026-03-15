@@ -1,0 +1,105 @@
+---
+# Dashy Configuration
+pageInfo:
+  title: Dev-Infra Dashboard
+  description: Central Hub for all Stateless Dev Machine Services
+  navLinks:
+  - title: GitHub
+    path: https://github.com/Lissy93/dashy
+  - title: Documentation
+    path: https://dashy.to/docs
+
+appConfig:
+  theme: colorful
+  layout: auto
+  iconSize: medium
+  enableFontAwesome: true # Explicitly enable FA icons
+
+sections:
+- name: 🛠️ Core Dev Tools
+  icon: mdi-tools
+  items:
+  - title: Hoppscotch
+    description: Open-source API development ecosystem
+    icon: si-hoppscotch
+    url: http://localhost:3000
+  - title: Mailpit
+    description: Email testing tool
+    icon: mdi-email-open
+    url: http://localhost:8025
+  - title: Dozzle
+    description: Real-time log viewer for Docker containers
+    icon: mdi-console
+    url: http://localhost:8082
+  - title: pgAdmin
+    description: PostgreSQL administration and management
+    icon: si-postgresql
+    url: http://localhost:15432
+  - title: Compass Web
+    description: MongoDB GUI
+    icon: si-mongodb
+    url: http://localhost:17017
+
+- name: 🔐 IAM & Security
+  icon: mdi-shield-check
+  items:
+  - title: Keycloak
+    description: Identity and Access Management
+    icon: si-keycloak
+    url: http://localhost:8080
+  - title: Vault
+    description: Secret management
+    icon: si-hashicorpvault
+    url: http://localhost:8200
+
+- name: 📊 Monitoring & Orchestration
+  icon: mdi-chart-line
+  items:
+  - title: Portainer
+    description: Docker container management
+    icon: si-portainer
+    url: http://localhost:9000
+  - title: RabbitMQ Management
+    description: Message broker management
+    icon: si-rabbitmq
+    url: http://localhost:15672
+  - title: Flower
+    description: Celery cluster monitoring
+    icon: mdi-flower
+    url: http://localhost:5555
+  - title: SonarQube
+    description: Code quality and security
+    icon: si-sonarqube
+    url: http://localhost:9001
+
+- name: 🔎 Observability & Search
+  icon: mdi-magnify
+  items:
+  - title: OpenSearch Dashboards
+    description: Visualize and manage OpenSearch data
+    icon: si-opensearch
+    url: http://localhost:5601
+  - title: Ngrok
+    description: Introspect your ngrok tunnels
+    icon: si-ngrok
+    url: http://localhost:4040
+
+- name: 🗄️ Database Connections
+  icon: mdi-database
+  items:
+  - title: Postgres
+    description: Primary relational database
+    icon: si-postgresql
+    url: localhost:5432
+  - title: MongoDB
+    description: NoSQL Document Store
+    icon: si-mongodb
+    url: localhost:27017
+  - title: Redis
+    description: In-memory data structures
+    icon: si-redis
+    url: localhost:6379
+  - title: Kafka
+    description: Event streaming platform
+    icon: si-apachekafka
+    url: localhost:9092

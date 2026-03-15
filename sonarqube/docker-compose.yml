@@ -3,7 +3,7 @@ services:
     image: sonarqube:community
     container_name: sonarqube
     ports:
-      - "9000:9000" # NOTE: Portainer also uses 9000 by default. Please ensure Portainer is using 9443 or change this port.
+      - "9001:9000" # NOTE: Portainer uses 9000. Changed to 9001 to avoid conflict.
     environment:
       - SONAR_JDBC_URL=jdbc:postgresql://sonarqube_db:5432/sonarqube
       - SONAR_JDBC_USERNAME=sonar

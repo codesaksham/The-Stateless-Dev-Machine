@@ -1,7 +1,45 @@
 services:
+  hoppscotch-db:
+    image: postgres:15-alpine
+    container_name: hoppscotch-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: hoppscotch
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: hoppscotch
+    volumes:
+      - hoppscotch-db-data:/var/lib/postgresql/data
+
   hoppscotch:
     image: hoppscotch/hoppscotch:latest
     container_name: hoppscotch
     restart: unless-stopped
+    depends_on:
+      - hoppscotch-db
+    environment:
+      DATABASE_URL: "postgresql://hoppscotch:password@hoppscotch-db:5432/hoppscotch"
+      JWT_SECRET: "supersecretjwtsecret"
+      TOKEN_SALT: "supersecrettokensalt"
+      SESSION_SECRET: "supersecretsessionsecret"
+      DATA_ENCRYPTION_KEY: "01234567890123456789012345678901"
+      WHITELISTED_ORIGINS: "http://localhost:3000,http://localhost:3170,http://localhost:3100,http://localhost:3200"
+      VITE_BASE_URL: "http://localhost:3000"
+      VITE_CORE_URL: "http://localhost:3000"
+      VITE_ADMIN_URL: "http://localhost:3170"
     ports:
       - "3000:3000"
+      - "3170:3170"
+      - "3100:3100"
+
+  hoppscotch-proxy:
+    image: hoppscotch/proxyscotch:latest
+    container_name: hoppscotch-proxy
+    restart: unless-stopped
+    ports:
+      - "9159:9159"
+    environment:
+      PORT: 9159
+      HOST: "0.0.0.0"
+
+volumes:
+  hoppscotch-db-data:

@@ -4,7 +4,7 @@
 # Run this script with: sudo ./test_infra.sh
 
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SERVICES=("postgres" "mongo" "redis" "rabbitmq" "kafka" "pgadmin" "compass-mongo" "celery" "localstack" "mailpit" "keycloak" "dozzle" "traefik" "opensearch" "portainer" "vault" "sonarqube" "ngrok" "postwoman-hoppscotch")
+SERVICES=("postgres" "mongo" "redis" "rabbitmq" "kafka" "pgadmin" "compass-mongo" "celery" "localstack" "mailpit" "keycloak" "dozzle" "traefik" "opensearch" "portainer" "vault" "sonarqube" "ngrok" "postwoman-hoppscotch" "dashy")
 
 echo "==========================================="
 echo "   Infrastructure Health Check Tool        "
@@ -87,5 +87,8 @@ check_url "pgAdmin" "http://localhost:15432"
 check_url "Compass Web" "http://localhost:17017"
 check_url "RabbitMQ Mgmt" "http://localhost:15672"
 check_url "Celery Flower" "http://localhost:5555"
+check_url "SonarQube" "http://localhost:9001"
+check_url "Hoppscotch" "http://localhost:3000"
+check_url "Dashy Dashboard" "http://localhost:4000"
 
 echo "==========================================="

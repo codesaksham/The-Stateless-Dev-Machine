@@ -26,6 +26,8 @@ This infrastructure stack includes the following services, each housed in its re
 - **SonarQube**: Continuous inspection of code quality and security (`sonarqube/`)
 - **Vault**: Secrets and identity management (`vault/`)
 - **Ngrok**: Ingress to local applications (`ngrok/`)
+- **Hoppscotch**: API development ecosystem (`postwoman-hoppscotch/`)
+- **Dashy**: Centralized dashboard for all services (`dashy/`)
 
 ## Usage
 

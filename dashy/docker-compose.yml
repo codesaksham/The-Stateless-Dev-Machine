@@ -1,0 +1,14 @@
+services:
+  dashy:
+    image: lissy93/dashy:latest
+    container_name: dashy
+    volumes:
+      - ./conf.yml:/app/user-data/conf.yml
+    ports:
+      - "4000:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'node', '/app/services/healthcheck']
+      interval: 1m
+      timeout: 10s
+      retries: 3
