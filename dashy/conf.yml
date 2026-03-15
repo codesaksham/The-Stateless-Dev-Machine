@@ -8,6 +8,8 @@ pageInfo:
     path: https://github.com/Lissy93/dashy
   - title: Documentation
     path: https://dashy.to/docs
+  - title: Gitea (Local Git)
+    path: http://localhost:3001
 
 appConfig:
   theme: colorful
@@ -51,6 +53,14 @@ sections:
     description: Secret management
     icon: si-hashicorpvault
     url: http://localhost:8200
+  - title: Trivy
+    description: Security vulnerability scanner
+    icon: mdi-shield-search
+    url: http://localhost:4954
+  - title: DefectDojo
+    description: Vulnerability management
+    icon: mdi-shield-bug
+    url: http://localhost:8084
 
 - name: 📊 Monitoring & Orchestration
   icon: mdi-chart-line
@@ -71,6 +81,14 @@ sections:
     description: Code quality and security
     icon: si-sonarqube
     url: http://localhost:9001
+  - title: Gitea
+    description: Self-hosted Git with CI/CD
+    icon: si-gitea
+    url: http://localhost:3001
+  - title: Semaphore
+    description: Ansible UI for DevOps automation
+    icon: si-ansible
+    url: http://localhost:3005
 
 - name: 🔎 Observability & Search
   icon: mdi-magnify
@@ -79,6 +97,22 @@ sections:
     description: Visualize and manage OpenSearch data
     icon: si-opensearch
     url: http://localhost:5601
+  - title: SigNoz
+    description: Observability and Performance monitoring
+    icon: si-signoz
+    url: http://localhost:8085
+  - title: Pyroscope
+    description: Continuous profiling for Python
+    icon: mdi-speedometer
+    url: http://localhost:4041
+  - title: Redpanda Console
+    description: Kafka Topic & Cluster UI
+    icon: si-redpanda
+    url: http://localhost:8081
+  - title: Locust
+    description: Performance testing (Python-based)
+    icon: si-locust
+    url: http://localhost:8089
   - title: Ngrok
     description: Introspect your ngrok tunnels
     icon: si-ngrok

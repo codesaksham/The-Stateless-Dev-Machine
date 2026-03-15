@@ -1,0 +1,28 @@
+services:
+  # Simplified DefectDojo - just the main app and db for now
+  # In a full setup you'd need redis and celery
+  defectdojo_db:
+    image: postgres:15-alpine
+    container_name: defectdojo_db
+    environment:
+      - POSTGRES_DB=defectdojo
+      - POSTGRES_USER=defectdojo
+      - POSTGRES_PASSWORD=defectdojo
+    volumes:
+      - defectdojo_db_data:/var/lib/postgresql/data
+
+  defectdojo:
+    image: defectdojo/defectdojo-django:latest
+    container_name: defectdojo
+    environment:
+      - DD_DATABASE_URL=postgres://defectdojo:defectdojo@defectdojo_db:5432/defectdojo
+      - DD_SECRET_KEY=supersecretkey
+      - DD_ALLOWED_HOSTS=*
+    ports:
+      - "8084:8080"
+    depends_on:
+      - defectdojo_db
+    restart: always
+
+volumes:
+  defectdojo_db_data:

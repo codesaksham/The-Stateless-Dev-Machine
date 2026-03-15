@@ -1,0 +1,8 @@
+services:
+  trivy:
+    image: aquasec/trivy:latest
+    container_name: trivy
+    ports:
+      - "4954:4954"
+    command: server --listen 0.0.0.0:4954
+    restart: always

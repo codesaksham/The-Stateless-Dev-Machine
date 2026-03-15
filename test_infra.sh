@@ -4,7 +4,7 @@
 # Run this script with: sudo ./test_infra.sh
 
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SERVICES=("postgres" "mongo" "redis" "rabbitmq" "kafka" "pgadmin" "compass-mongo" "celery" "localstack" "mailpit" "keycloak" "dozzle" "traefik" "opensearch" "portainer" "vault" "sonarqube" "ngrok" "postwoman-hoppscotch" "dashy")
+SERVICES=("postgres" "mongo" "redis" "rabbitmq" "kafka" "pgadmin" "compass-mongo" "celery" "localstack" "mailpit" "keycloak" "dozzle" "traefik" "opensearch" "portainer" "vault" "sonarqube" "ngrok" "postwoman-hoppscotch" "dashy" "gitea" "locust" "pyroscope" "redpanda-console" "semaphore" "trivy" "defectdojo" "signoz")
 
 echo "==========================================="
 echo "   Infrastructure Health Check Tool        "
@@ -90,5 +90,13 @@ check_url "Celery Flower" "http://localhost:5555"
 check_url "SonarQube" "http://localhost:9001"
 check_url "Hoppscotch" "http://localhost:3000"
 check_url "Dashy Dashboard" "http://localhost:4000"
+check_url "Gitea" "http://localhost:3001"
+check_url "Locust" "http://localhost:8089"
+check_url "Pyroscope" "http://localhost:4041"
+check_url "Redpanda Console" "http://localhost:8081"
+check_url "Semaphore" "http://localhost:3005"
+check_url "Trivy" "http://localhost:4954"
+check_url "DefectDojo" "http://localhost:8084"
+check_url "SigNoz" "http://localhost:8085"
 
 echo "==========================================="

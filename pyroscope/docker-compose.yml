@@ -1,0 +1,7 @@
+services:
+  pyroscope:
+    image: grafana/pyroscope:latest
+    container_name: pyroscope
+    ports:
+      - "4041:4040"
+    restart: always

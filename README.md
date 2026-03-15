@@ -28,6 +28,13 @@ This infrastructure stack includes the following services, each housed in its re
 - **Ngrok**: Ingress to local applications (`ngrok/`)
 - **Hoppscotch**: API development ecosystem (`postwoman-hoppscotch/`)
 - **Dashy**: Centralized dashboard for all services (`dashy/`)
+- **Gitea**: Lightweight self-hosted Git service with CI/CD (`gitea/`)
+- **Locust**: Python-based performance testing (`locust/`)
+- **Pyroscope**: Continuous profiling for Python applications (`pyroscope/`)
+- **Redpanda Console**: Modern UI for Kafka topics and clusters (`redpanda-console/`)
+- **Semaphore**: Modern UI for Ansible automation (`semaphore/`)
+- **Trivy**: Vulnerability scanner for containers and dependencies (`trivy/`)
+- **DefectDojo**: Vulnerability management and security dashboard (`defectdojo/`)
 
 ## Usage
 
