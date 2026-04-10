@@ -41,6 +41,10 @@ sections:
     description: MongoDB GUI
     icon: si-mongodb
     url: http://localhost:17017
+  - title: Meeting Chat
+    description: Private WebSocket-based real-time chatroom
+    icon: mdi-chat-processing
+    url: http://localhost:8999/chat
 
 - name: 🔐 IAM & Security
   icon: mdi-shield-check

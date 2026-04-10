@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Chat</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #0f0f10;
+    color: #e8e8e8;
+    height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── Join screen ─────────────────────────────────── */
+  #join-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 320px;
+  }
+
+  #join-screen h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+
+  #join-screen p {
+    font-size: 13px;
+    color: #888;
+    text-align: center;
+  }
+
+  #join-screen input {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #2a2a2e;
+    background: #1a1a1e;
+    color: #e8e8e8;
+    font-size: 15px;
+    outline: none;
+    transition: border-color .15s;
+  }
+
+  #join-screen input:focus { border-color: #555; }
+
+  #join-btn {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    background: #e8e8e8;
+    color: #0f0f10;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .15s;
+  }
+
+  #join-btn:hover { opacity: .85; }
+  #join-error { color: #e05c5c; font-size: 13px; min-height: 16px; }
+
+  /* ── Chat layout ─────────────────────────────────── */
+  #chat-screen {
+    display: none;
+    width: 100%;
+    height: 100dvh;
+    max-width: 900px;
+    flex-direction: row;
+  }
+
+  /* Sidebar */
+  #sidebar {
+    width: 200px;
+    flex-shrink: 0;
+    border-right: 1px solid #1e1e22;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 16px;
+    gap: 12px;
+  }
+
+  #sidebar h2 {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #555;
+  }
+
+  #user-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .user-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #ccc;
+  }
+
+  .user-pill .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #3cba6e;
+    flex-shrink: 0;
+  }
+
+  .user-pill.me { color: #e8e8e8; font-weight: 600; }
+
+  /* Main chat area */
+  #chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  #chat-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid #1e1e22;
+    font-size: 14px;
+    color: #777;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  #chat-header span { color: #e8e8e8; font-weight: 600; }
+
+  #messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    scroll-behavior: smooth;
+  }
+
+  /* Message bubbles */
+  .msg-row {
+    display: flex;
+    flex-direction: column;
+    max-width: 70%;
+  }
+
+  .msg-row.mine { align-self: flex-end; align-items: flex-end; }
+  .msg-row.theirs { align-self: flex-start; align-items: flex-start; }
+
+  .msg-name {
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 3px;
+    padding: 0 4px;
+  }
+
+  .msg-bubble {
+    padding: 9px 14px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  .mine .msg-bubble {
+    background: #e8e8e8;
+    color: #0f0f10;
+    border-bottom-right-radius: 4px;
+  }
+
+  .theirs .msg-bubble {
+    background: #1e1e22;
+    color: #e8e8e8;
+    border-bottom-left-radius: 4px;
+  }
+
+  /* System messages */
+  .sys-msg {
+    align-self: center;
+    font-size: 12px;
+    color: #555;
+    padding: 2px 10px;
+    border-radius: 20px;
+    background: #17171a;
+  }
+
+  /* Input bar */
+  #input-bar {
+    display: flex;
+    gap: 10px;
+    padding: 14px 20px;
+    border-top: 1px solid #1e1e22;
+    align-items: center;
+  }
+
+  #msg-input {
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #2a2a2e;
+    background: #1a1a1e;
+    color: #e8e8e8;
+    font-size: 14px;
+    outline: none;
+    transition: border-color .15s;
+  }
+
+  #msg-input:focus { border-color: #444; }
+
+  #send-btn {
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: none;
+    background: #e8e8e8;
+    color: #0f0f10;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .15s;
+    white-space: nowrap;
+  }
+
+  #send-btn:hover { opacity: .85; }
+  #send-btn:disabled { opacity: .4; cursor: default; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #2a2a2e; border-radius: 4px; }
+
+  @media (max-width: 560px) {
+    #sidebar { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Join Screen ── -->
+<div id="join-screen">
+  <h1>💬 Chat Room</h1>
+  <p>Enter a username to join the conversation.</p>
+  <input id="username-input" type="text" maxlength="24" placeholder="Your name…" autocomplete="off" />
+  <div id="join-error"></div>
+  <button id="join-btn">Join</button>
+</div>
+
+<!-- ── Chat Screen ── -->
+<div id="chat-screen">
+  <div id="sidebar">
+    <h2>Online</h2>
+    <div id="user-list"></div>
+  </div>
+  <div id="chat-area">
+    <div id="chat-header">
+      Chatting as <span id="header-name"></span>
+    </div>
+    <div id="messages"></div>
+    <div id="input-bar">
+      <input id="msg-input" type="text" placeholder="Message…" maxlength="1000" autocomplete="off" />
+      <button id="send-btn">Send</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const joinScreen  = document.getElementById('join-screen');
+  const chatScreen  = document.getElementById('chat-screen');
+  const joinBtn     = document.getElementById('join-btn');
+  const joinError   = document.getElementById('join-error');
+  const usernameInput = document.getElementById('username-input');
+  const messages    = document.getElementById('messages');
+  const msgInput    = document.getElementById('msg-input');
+  const sendBtn     = document.getElementById('send-btn');
+  const userList    = document.getElementById('user-list');
+  const headerName  = document.getElementById('header-name');
+
+  let ws = null;
+  let myUsername = '';
+
+  usernameInput.focus();
+  usernameInput.addEventListener('keydown', e => { if (e.key === 'Enter') joinBtn.click(); });
+  msgInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendBtn.click(); } });
+
+  joinBtn.addEventListener('click', () => {
+    const username = usernameInput.value.trim();
+    if (!username) { joinError.textContent = 'Please enter a username.'; return; }
+    if (!/^[a-zA-Z0-9_\-. ]{1,24}$/.test(username)) {
+      joinError.textContent = 'Only letters, numbers, spaces, _ - . allowed.';
+      return;
+    }
+    joinError.textContent = '';
+    connect(username);
+  });
+
+  function connect(username) {
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    const url = `${proto}://${location.host}/ws/${encodeURIComponent(username)}`;
+    ws = new WebSocket(url);
+
+    ws.onopen = () => {
+      myUsername = username;
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      if (data.type === 'error') {
+        joinError.textContent = data.message;
+        ws.close();
+        ws = null;
+        return;
+      }
+
+      if (data.type === 'welcome') {
+        joinScreen.style.display = 'none';
+        chatScreen.style.display = 'flex';
+        headerName.textContent = myUsername;
+        msgInput.focus();
+        appendSystem(data.message);
+        updateUserList(data.users);
+        return;
+      }
+
+      if (data.type === 'system') {
+        appendSystem(data.message);
+        updateUserList(data.users);
+        return;
+      }
+
+      if (data.type === 'message') {
+        appendMessage(data.from, data.message, data.from === myUsername);
+        updateUserList(data.users);
+        return;
+      }
+    };
+
+    ws.onclose = () => {
+      if (chatScreen.style.display === 'flex') {
+        appendSystem('Disconnected from server. Refresh to rejoin.');
+        sendBtn.disabled = true;
+      }
+    };
+
+    ws.onerror = () => {
+      joinError.textContent = 'Could not connect. Is the server running?';
+      ws = null;
+    };
+  }
+
+  sendBtn.addEventListener('click', () => {
+    const text = msgInput.value.trim();
+    if (!text || !ws) return;
+    ws.send(JSON.stringify({ message: text }));
+    appendMessage(myUsername, text, true);
+    msgInput.value = '';
+    msgInput.focus();
+  });
+
+  function appendMessage(from, text, isMine) {
+    const row = document.createElement('div');
+    row.className = 'msg-row ' + (isMine ? 'mine' : 'theirs');
+
+    if (!isMine) {
+      const name = document.createElement('div');
+      name.className = 'msg-name';
+      name.textContent = from;
+      row.appendChild(name);
+    }
+
+    const bubble = document.createElement('div');
+    bubble.className = 'msg-bubble';
+    bubble.textContent = text;
+    row.appendChild(bubble);
+
+    messages.appendChild(row);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function appendSystem(text) {
+    const el = document.createElement('div');
+    el.className = 'sys-msg';
+    el.textContent = text;
+    messages.appendChild(el);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function updateUserList(users) {
+    userList.innerHTML = '';
+    users.forEach(u => {
+      const pill = document.createElement('div');
+      pill.className = 'user-pill' + (u === myUsername ? ' me' : '');
+      pill.innerHTML = `<span class="dot"></span><span>${escapeHtml(u)}${u === myUsername ? ' (you)' : ''}</span>`;
+      userList.appendChild(pill);
+    });
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+</script>
+</body>
+</html>

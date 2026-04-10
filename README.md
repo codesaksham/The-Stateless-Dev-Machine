@@ -35,6 +35,7 @@ This infrastructure stack includes the following services, each housed in its re
 - **Semaphore**: Modern UI for Ansible automation (`semaphore/`)
 - **Trivy**: Vulnerability scanner for containers and dependencies (`trivy/`)
 - **DefectDojo**: Vulnerability management and security dashboard (`defectdojo/`)
+- **Private Meeting Chatroom**: Real-time WebSocket chat application (`private-meeting-chatroom/`)
 
 ## Usage
 
