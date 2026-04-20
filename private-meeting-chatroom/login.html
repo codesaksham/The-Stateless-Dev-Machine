@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - PMCR</title>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f0f12;
+      color: #e8e8e8;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .login-card {
+      background: rgba(26, 26, 30, 0.8);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 40px;
+      border-radius: 24px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #fff 0%, #888 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -1px;
+    }
+
+    p {
+      color: #888;
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #555;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px 18px;
+      background: #151518;
+      border: 1px solid #2a2a2e;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 15px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    input:focus {
+      border-color: #555;
+      background: #1a1a1e;
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05);
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background: #e8e8e8;
+      color: #0f0f12;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    #error-msg {
+      color: #ff5f5f;
+      font-size: 13px;
+      margin-top: 15px;
+      text-align: center;
+      min-height: 18px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login-card">
+    <h1>Let's Chat Together</h1>
+    <p>Private Meeting Chat Room</p>
+    <form id="login-form">
+      <div class="input-group">
+        <label>Username</label>
+        <input type="text" id="username" required autocomplete="username">
+      </div>
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="password" required autocomplete="current-password">
+      </div>
+      <button type="submit">Sign In</button>
+    </form>
+    <div id="error-msg"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('login-form');
+    const errorMsg = document.getElementById('error-msg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMsg.textContent = '';
+
+      const formData = new FormData();
+      formData.append('username', document.getElementById('username').value);
+      formData.append('password', document.getElementById('password').value);
+
+      try {
+        const response = await fetch('/token', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          localStorage.setItem('pmcr_token', data.access_token);
+          window.location.href = '/chat';
+        } else {
+          const err = await response.json();
+          errorMsg.textContent = err.detail || 'Login failed';
+        }
+      } catch (err) {
+        errorMsg.textContent = 'Connection error. Please try again.';
+      }
+    });
+
+    // Check if already logged in
+    if (localStorage.getItem('pmcr_token')) {
+      // Optional: verify token or just redirect
+      // window.location.href = '/chat';
+    }
+  </script>
+</body>
+
+</html>

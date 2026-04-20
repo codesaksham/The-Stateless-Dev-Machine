@@ -4,4 +4,5 @@ services:
     container_name: private-meeting-chatroom
     ports:
       - "8999:8999"
+    network_mode: host
     restart: unless-stopped
