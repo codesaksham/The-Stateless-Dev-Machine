@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EnvComparer // Premium Env Diff Utility</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Modern CSS Reset & Variable Definitions */
+        :root {
+            --bg-dark: #070a13;
+            --bg-deep: #0b0f19;
+            --card-bg: rgba(17, 25, 40, 0.75);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            
+            /* Status Colors (HSL) */
+            --color-primary: 220, 95%, 60%; /* Indigo */
+            --color-accent: 180, 100%, 45%;  /* Cyan */
+            --color-match: 142, 70%, 45%;    /* Emerald Green */
+            --color-mismatch: 350, 80%, 55%; /* Coral/Red */
+            --color-missing-r: 38, 92%, 50%; /* Amber/Orange */
+            --color-missing-l: 270, 75%, 60%;/* Purple */
+            
+            --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 10% 10%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
+                radial-gradient(at 90% 90%, rgba(6, 182, 212, 0.08) 0px, transparent 50%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            padding: 2.5rem 1rem 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, hsl(var(--color-primary)) 0%, hsl(var(--color-accent)) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            letter-spacing: -0.05em;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 40px rgba(99, 102, 241, 0.2);
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .logo span {
+            font-family: 'Fira Code', monospace;
+            font-weight: 400;
+            opacity: 0.8;
+            font-size: 2rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 300;
+            max-width: 600px;
+            margin: 0 auto;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        main {
+            flex: 1;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1.5rem 3rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Glassmorphic Panel Base style */
+        .glass-panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transition: var(--transition-smooth);
+        }
+
+        .glass-panel:hover {
+            border-color: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.45);
+        }
+
+        /* Input Form & Textboxes Grid */
+        .compare-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .inputs-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .inputs-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .input-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            position: relative;
+        }
+
+        .input-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .input-label {
+            font-size: 1.1rem;
+            font-weight: 500;
+            letter-spacing: -0.01em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .input-label::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .input-left .input-label::before {
+            background-color: hsl(var(--color-primary));
+            box-shadow: 0 0 8px hsl(var(--color-primary));
+        }
+
+        .input-right .input-label::before {
+            background-color: hsl(var(--color-accent));
+            box-shadow: 0 0 8px hsl(var(--color-accent));
+        }
+
+        .quick-actions-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-secondary);
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            font-family: inherit;
+        }
+
+        .quick-actions-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .env-textarea {
+            width: 100%;
+            height: 250px;
+            background: rgba(5, 7, 15, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 1rem;
+            color: #d1d5db;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            resize: vertical;
+            transition: var(--transition-smooth);
+            outline: none;
+        }
+
+        .env-textarea:focus {
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.15);
+            background: rgba(5, 7, 15, 0.9);
+        }
+
+        /* Controls Section */
+        .controls-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 1.5rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            font-family: inherit;
+            padding: 0.85rem 1.75rem;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, hsl(var(--color-primary)) 0%, hsl(var(--color-accent)) 100%);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .header-label-input {
+            background: transparent;
+            border: none;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.15);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-weight: 600;
+            font-family: inherit;
+            padding: 0.1rem 0.25rem;
+            outline: none;
+            transition: var(--transition-smooth);
+            max-width: 180px;
+        }
+
+        .header-label-input:focus {
+            border-bottom-color: rgba(99, 102, 241, 0.7);
+            text-shadow: 0 0 8px rgba(99, 102, 241, 0.4);
+        }
+
+        .mark-safe-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-smooth);
+            opacity: 0.4;
+            flex-shrink: 0;
+        }
+
+        .mark-safe-btn:hover {
+            opacity: 1;
+            color: #fbbf24;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .mark-safe-btn.safe {
+            opacity: 1;
+            color: #10b981;
+        }
+
+        /* Results Display */
+        .results-section {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .stat-card {
+            background: rgba(17, 25, 40, 0.5);
+            border: 1px solid var(--card-border);
+            padding: 1.25rem;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition-smooth);
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+        }
+
+        .stat-card.matches::after { background: hsl(var(--color-match)); }
+        .stat-card.mismatches::after { background: hsl(var(--color-mismatch)); }
+        .stat-card.missing-r::after { background: hsl(var(--color-missing-r)); }
+        .stat-card.missing-l::after { background: hsl(var(--color-missing-l)); }
+        .stat-card.safe-stats::after { background: #6b7280; }
+
+        .stat-card.safe-stats .stat-value { color: #9ca3af; }
+
+        /* Silenced Row Styles */
+        .diff-row.silenced-row {
+            opacity: 0.5;
+            border-left-color: #4b5563 !important;
+            background: rgba(255, 255, 255, 0.005) !important;
+        }
+
+        .diff-row.silenced-row .status-badge {
+            background: rgba(75, 85, 99, 0.15) !important;
+            color: #9ca3af !important;
+            border: 1px solid rgba(75, 85, 99, 0.25) !important;
+        }
+
+        .diff-row.silenced-row .col-value {
+            background: transparent !important;
+            border: 1px dashed rgba(255, 255, 255, 0.04) !important;
+        }
+
+        .diff-row.silenced-row .val-text {
+            color: var(--text-muted) !important;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .stat-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            font-family: 'Fira Code', monospace;
+            line-height: 1.2;
+        }
+
+        .stat-card.matches .stat-value { color: hsl(var(--color-match)); }
+        .stat-card.mismatches .stat-value { color: hsl(var(--color-mismatch)); }
+        .stat-card.missing-r .stat-value { color: hsl(var(--color-missing-r)); }
+        .stat-card.missing-l .stat-value { color: hsl(var(--color-missing-l)); }
+
+        /* Filter Toolbar */
+        .filter-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 1rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            background: rgba(5, 7, 15, 0.5);
+            padding: 0.35rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .tab-btn span {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .tab-btn.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .tab-btn.active.mismatch-tab { color: #f87171; background: rgba(239, 68, 68, 0.1); }
+        .tab-btn.active.missing-r-tab { color: #fbbf24; background: rgba(245, 158, 11, 0.1); }
+        .tab-btn.active.missing-l-tab { color: #c084fc; background: rgba(168, 85, 247, 0.1); }
+        .tab-btn.active.match-tab { color: #34d399; background: rgba(16, 185, 129, 0.1); }
+
+        .search-box {
+            position: relative;
+            min-width: 250px;
+        }
+
+        .search-input {
+            width: 100%;
+            background: rgba(5, 7, 15, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            outline: none;
+            transition: var(--transition-smooth);
+        }
+
+        .search-input:focus {
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.1);
+        }
+
+        /* Diff Comparison Table View */
+        .diff-container {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(10, 15, 30, 0.4);
+        }
+
+        .diff-grid-header {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr 1fr;
+            padding: 1rem 1.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .diff-rows {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .diff-row {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr 1fr;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            align-items: center;
+            transition: var(--transition-smooth);
+            position: relative;
+        }
+
+        .diff-row:last-child {
+            border-bottom: none;
+        }
+
+        .diff-row:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Styling based on Row status */
+        .diff-row.status-match {
+            border-left: 3px solid hsla(var(--color-match), 0.7);
+        }
+        .diff-row.status-mismatch {
+            border-left: 3px solid hsla(var(--color-mismatch), 0.8);
+            background: hsla(var(--color-mismatch), 0.02);
+        }
+        .diff-row.status-missing_right {
+            border-left: 3px solid hsla(var(--color-missing-r), 0.8);
+            background: hsla(var(--color-missing-r), 0.02);
+        }
+        .diff-row.status-missing_left {
+            border-left: 3px solid hsla(var(--color-missing-l), 0.8);
+            background: hsla(var(--color-missing-l), 0.02);
+        }
+
+        /* Keys Column */
+        .col-key {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-right: 1rem;
+        }
+
+        .key-text {
+            font-family: 'Fira Code', monospace;
+            font-weight: 500;
+            font-size: 0.9rem;
+            word-break: break-all;
+            color: #e5e7eb;
+        }
+
+        .status-badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .status-match .status-badge {
+            background: hsla(var(--color-match), 0.15);
+            color: #34d399;
+            border: 1px solid hsla(var(--color-match), 0.25);
+        }
+        .status-mismatch .status-badge {
+            background: hsla(var(--color-mismatch), 0.15);
+            color: #f87171;
+            border: 1px solid hsla(var(--color-mismatch), 0.25);
+        }
+        .status-missing_right .status-badge {
+            background: hsla(var(--color-missing-r), 0.15);
+            color: #fbbf24;
+            border: 1px solid hsla(var(--color-missing-r), 0.25);
+        }
+        .status-missing_left .status-badge {
+            background: hsla(var(--color-missing-l), 0.15);
+            color: #c084fc;
+            border: 1px solid hsla(var(--color-missing-l), 0.25);
+        }
+
+        /* Values Columns */
+        .col-value {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            word-break: break-all;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 2.2rem;
+            margin-right: 0.75rem;
+        }
+
+        .val-text {
+            color: #d1d5db;
+        }
+
+        .empty-placeholder {
+            color: var(--text-muted);
+            font-style: italic;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .empty-placeholder svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* Style overlays for value mismatches */
+        .status-mismatch .col-value {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px dashed rgba(239, 68, 68, 0.2);
+        }
+        .status-mismatch .col-value .val-text {
+            color: #fca5a5;
+        }
+        .status-missing_right .col-right-val {
+            background: rgba(245, 158, 11, 0.05);
+            border: 1px dashed rgba(245, 158, 11, 0.15);
+        }
+        .status-missing_left .col-left-val {
+            background: rgba(168, 85, 247, 0.05);
+            border: 1px dashed rgba(168, 85, 247, 0.15);
+        }
+
+        /* Copy Button for Value Click */
+        .copy-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            opacity: 0;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .col-value:hover .copy-btn {
+            opacity: 1;
+            color: var(--text-secondary);
+        }
+
+        .copy-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255,255,255,0.06);
+        }
+
+        /* No Results Empty State */
+        .empty-results-panel {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .empty-results-icon {
+            font-size: 3rem;
+            opacity: 0.5;
+            background: linear-gradient(135deg, hsl(var(--color-primary)) 0%, hsl(var(--color-accent)) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .empty-results-text {
+            font-size: 1.1rem;
+            max-width: 450px;
+            font-weight: 300;
+        }
+
+        /* Footer styling */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            margin-top: auto;
+        }
+
+        footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: var(--transition-smooth);
+        }
+
+        footer a:hover {
+            color: white;
+            text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #111827;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 1000;
+            transform: translateY(150%);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+        }
+
+        .toast-icon {
+            color: #34d399;
+        }
+
+        .duplicate-warning {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.7rem;
+            color: hsl(38, 92%, 50%); /* Warm Amber */
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            padding: 0.15rem 0.45rem;
+            border-radius: 4px;
+            cursor: help;
+            transition: var(--transition-smooth);
+            margin-left: 0.5rem;
+            user-select: none;
+        }
+
+        .duplicate-warning:hover {
+            background: rgba(245, 158, 11, 0.15);
+            border-color: rgba(245, 158, 11, 0.4);
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.25);
+        }
+
+        .duplicate-warning svg {
+            flex-shrink: 0;
+        }
+
+        /* Branding by codesaksham */
+        .brand-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            user-select: none;
+            transition: var(--transition-smooth);
+            text-decoration: none;
+        }
+
+        .brand-badge:hover {
+            color: hsl(var(--color-primary));
+            background: rgba(99, 102, 241, 0.08);
+            border-color: rgba(99, 102, 241, 0.25);
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.15);
+            cursor: pointer;
+        }
+
+        .brand-badge svg {
+            color: #ef4444; /* Heart icon red */
+            animation: pulse-heart 1.5s infinite ease-in-out;
+            fill: #ef4444;
+        }
+
+        @keyframes pulse-heart {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        /* Keyframes */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 900px) {
+            .diff-grid-header, .diff-row {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+                padding: 1.25rem;
+            }
+            .diff-grid-header {
+                display: none; /* Hide header on mobile view */
+            }
+            .col-key {
+                border-bottom: 1px solid rgba(255,255,255,0.05);
+                padding-bottom: 0.5rem;
+                margin-bottom: 0.25rem;
+            }
+            .col-value {
+                margin-right: 0;
+            }
+            .col-left-val::before {
+                content: 'List A: ';
+                font-size: 0.7rem;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                margin-right: 0.5rem;
+            }
+            .col-right-val::before {
+                content: 'List B: ';
+                font-size: 0.7rem;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                margin-right: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
+        <h1 class="logo" style="margin-bottom: 0;">EnvComparer <span>//</span></h1>
+        <a class="brand-badge" href="https://github.com/codesaksham" target="_blank" rel="noopener noreferrer">
+            <svg width="10" height="10" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
+            </svg>
+            <span>crafted with love by codesaksham</span>
+        </a>
+        <p class="subtitle">A premium side-by-side alignment & comparison tool for .env configurations. Resolves mismatched values and missing variables in seconds.</p>
+    </header>
+
+    <main>
+        <!-- Input Panel -->
+        <section class="glass-panel">
+            <form action="/" method="POST" class="compare-form" id="comparer-form">
+                <!-- Comma separated string of safe keys -->
+                <input type="hidden" name="safe_keys" id="safe-keys-input" value="{{ safe_keys_str | default('') }}">
+                
+                <div class="inputs-container">
+                    <!-- Left List Box -->
+                    <div class="input-wrapper input-left">
+                        <div class="input-header">
+                            <input type="text" name="left_label" class="header-label-input" value="{{ left_label | default('Environment List A') }}" placeholder="Environment List A" title="Edit list label">
+                            <div class="btn-group">
+                                <button type="button" class="quick-actions-btn" id="load-sample-a">Sample A</button>
+                                <button type="button" class="quick-actions-btn" id="clear-a">Clear</button>
+                            </div>
+                        </div>
+                        <textarea 
+                            name="left_content" 
+                            id="left_content" 
+                            class="env-textarea" 
+                            placeholder="PASTE ENV LIST A HERE&#10;e.g.&#10;DATABASE_URL=postgresql://localhost/db&#10;PORT=8000"
+                        >{{ left_content }}</textarea>
+                    </div>
+
+                    <!-- Right List Box -->
+                    <div class="input-wrapper input-right">
+                        <div class="input-header">
+                            <input type="text" name="right_label" class="header-label-input" value="{{ right_label | default('Environment List B') }}" placeholder="Environment List B" title="Edit list label">
+                            <div class="btn-group">
+                                <button type="button" class="quick-actions-btn" id="load-sample-b">Sample B</button>
+                                <button type="button" class="quick-actions-btn" id="clear-b">Clear</button>
+                            </div>
+                        </div>
+                        <textarea 
+                            name="right_content" 
+                            id="right_content" 
+                            class="env-textarea" 
+                            placeholder="PASTE ENV LIST B HERE&#10;e.g.&#10;DATABASE_URL=postgresql://localhost/dev_db&#10;DEBUG=true"
+                        >{{ right_content }}</textarea>
+                    </div>
+                </div>
+
+                <div class="controls-row">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-secondary" id="load-both-samples">Load Sample Comparison</button>
+                        <button type="button" class="btn btn-secondary" id="clear-both">Clear All</button>
+                    </div>
+                    
+                    <a class="brand-badge" href="https://github.com/codesaksham" target="_blank" rel="noopener noreferrer" style="opacity: 0.7;">
+                        <svg width="10" height="10" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
+                        </svg>
+                        <span>codesaksham</span>
+                    </a>
+
+                    <button type="submit" class="btn btn-primary" id="compare-submit">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                        </svg>
+                        Align & Compare
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Results Panel -->
+        {% if has_results %}
+        <section class="glass-panel results-section" id="results-panel">
+            
+            <!-- Statistics Grid -->
+            <div class="stats-grid">
+                <div class="stat-card matches">
+                    <span class="stat-title">Fully Matching</span>
+                    <span class="stat-value" id="stats-matches">{{ stats.matches }}</span>
+                </div>
+                <div class="stat-card mismatches">
+                    <span class="stat-title">Value Mismatches</span>
+                    <span class="stat-value" id="stats-mismatches">{{ stats.mismatches }}</span>
+                </div>
+                <div class="stat-card missing-r">
+                    <span class="stat-title">Missing on Right</span>
+                    <span class="stat-value" id="stats-missing-r">{{ stats.missing_right }}</span>
+                </div>
+                <div class="stat-card missing-l">
+                    <span class="stat-title">Missing on Left</span>
+                    <span class="stat-value" id="stats-missing-l">{{ stats.missing_left }}</span>
+                </div>
+                <div class="stat-card safe-stats">
+                    <span class="stat-title">Silenced (Safe)</span>
+                    <span class="stat-value" id="stats-safe">{{ stats.safe | default(0) }}</span>
+                </div>
+            </div>
+
+            <!-- Toolbar (Filter & Search) -->
+            <div class="filter-toolbar">
+                <div class="tabs">
+                    <button type="button" class="tab-btn active" data-filter="all">All <span>{{ stats.matches + stats.mismatches + stats.missing_right + stats.missing_left + (stats.safe | default(0)) }}</span></button>
+                    <button type="button" class="tab-btn mismatch-tab" data-filter="mismatch">Mismatches <span>{{ stats.mismatches }}</span></button>
+                    <button type="button" class="tab-btn missing-r-tab" data-filter="missing_right">Missing Right <span>{{ stats.missing_right }}</span></button>
+                    <button type="button" class="tab-btn missing-l-tab" data-filter="missing_left">Missing Left <span>{{ stats.missing_left }}</span></button>
+                    <button type="button" class="tab-btn match-tab" data-filter="match">Matches <span>{{ stats.matches }}</span></button>
+                    <button type="button" class="tab-btn silenced-tab" data-filter="silenced">Silenced <span>{{ stats.safe | default(0) }}</span></button>
+                </div>
+
+                <a class="brand-badge" href="https://github.com/codesaksham" target="_blank" rel="noopener noreferrer" style="opacity: 0.6; font-size: 0.65rem; border-color: transparent; background: transparent;">
+                    <svg width="8" height="8" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
+                    </svg>
+                    <span>by codesaksham</span>
+                </a>
+
+                <div class="search-box">
+                    <input type="text" class="search-input" id="search-filter" placeholder="Search keys or values...">
+                </div>
+            </div>
+
+            <!-- Comparison Alignment Grid -->
+            <div class="diff-container">
+                <div class="diff-grid-header">
+                    <div>Environment Key</div>
+                    <div id="header-label-a">Value in {{ left_label | default('List A') }}</div>
+                    <div id="header-label-b">Value in {{ right_label | default('List B') }}</div>
+                </div>
+                <div class="diff-rows" id="diff-rows-container">
+                    {% for item in diff_items %}
+                    <div class="diff-row status-{{ item.status }} {% if item.is_safe %}silenced-row{% endif %}" data-status="{{ item.status }}" data-key="{{ item.key }}">
+                        <!-- Key Column -->
+                        <div class="col-key">
+                            {% if item.status != 'match' %}
+                            <button type="button" class="mark-safe-btn {% if item.is_safe %}safe{% endif %}" 
+                                    data-key="{{ item.key }}" 
+                                    title="{% if item.is_safe %}Mark active (remove safe silence){% else %}Mark safe (silence intentional discrepancy){% endif %}"
+                                    onclick="event.stopPropagation(); toggleMarkSafe('{{ item.key }}', this)">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                </svg>
+                            </button>
+                            {% endif %}
+                            <span class="status-badge">{% if item.is_safe %}safe{% else %}{{ item.status | replace('_', ' ') }}{% endif %}</span>
+                            <span class="key-text">{{ item.key }}</span>
+                        </div>
+                        
+                        <!-- Value A Column -->
+                        <div class="col-value col-left-val" onclick="copyToClipboard('{{ item.left_value | default('') | escape }}', this)">
+                            {% if item.left_value is not none %}
+                            <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                                <span class="val-text">{{ item.left_value }}</span>
+                                {% if item.left_duplicates and item.left_duplicates | length > 1 %}
+                                <div class="duplicate-warning" title="Duplicate definitions found in A: {{ item.left_duplicates | join(' ➔ ') }}">
+                                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                    </svg>
+                                    <span>Duplicate ({{ item.left_duplicates | length }}x)</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <span class="empty-placeholder">
+                                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                Not Present
+                            </span>
+                            {% endif %}
+                            {% if item.left_value is not none %}
+                            <button class="copy-btn" title="Copy to clipboard">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m-2 4h10m-5-5v10"></path></svg>
+                            </button>
+                            {% endif %}
+                        </div>
+
+                        <!-- Value B Column -->
+                        <div class="col-value col-right-val" onclick="copyToClipboard('{{ item.right_value | default('') | escape }}', this)">
+                            {% if item.right_value is not none %}
+                            <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                                <span class="val-text">{{ item.right_value }}</span>
+                                {% if item.right_duplicates and item.right_duplicates | length > 1 %}
+                                <div class="duplicate-warning" title="Duplicate definitions found in B: {{ item.right_duplicates | join(' ➔ ') }}">
+                                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                    </svg>
+                                    <span>Duplicate ({{ item.right_duplicates | length }}x)</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <span class="empty-placeholder">
+                                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                Not Present
+                            </span>
+                            {% endif %}
+                            {% if item.right_value is not none %}
+                            <button class="copy-btn" title="Copy to clipboard">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m-2 4h10m-5-5v10"></path></svg>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </section>
+        {% else %}
+        <!-- Initial Welcome Empty Panel -->
+        <section class="glass-panel empty-results-panel">
+            <div class="empty-results-icon">
+                <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"></path>
+                </svg>
+            </div>
+            <div class="empty-results-text">
+                Input environment variable lists above and click <strong>Align & Compare</strong> to see live, aligned visual differences across matches, mismatches, and missing properties.
+            </div>
+            <button type="button" class="btn btn-secondary" id="run-initial-demo">Run Demo Comparison</button>
+        </section>
+        {% endif %}
+    </main>
+
+    <!-- Global Toast -->
+    <div class="toast" id="clipboard-toast">
+        <svg class="toast-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span>Value copied to clipboard!</span>
+    </div>
+
+    <footer>
+        <p>EnvComparer &copy; 2026. Aligned and compared elegantly.</p>
+        <a class="brand-badge" href="https://github.com/codesaksham" target="_blank" rel="noopener noreferrer" style="margin-top: 0.6rem; transform: scale(0.95);">
+            <svg width="10" height="10" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
+            </svg>
+            <span>created with love for developers by codesaksham</span>
+        </a>
+    </footer>
+
+    <!-- Interactive JS Scripts -->
+    <script>
+        // Sample data variables passed safely from server
+        const SAMPLE_A_DATA = {{ sample_left | tojson }};
+        const SAMPLE_B_DATA = {{ sample_right | tojson }};
+
+        // Maintain safe keys in a global Set
+        let safeKeys = new Set();
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // Setup Sample Loader Buttons
+            const loadSampleA = document.getElementById("load-sample-a");
+            const loadSampleB = document.getElementById("load-sample-b");
+            const loadBothSamples = document.getElementById("load-both-samples");
+            const runInitialDemo = document.getElementById("run-initial-demo");
+            
+            const clearA = document.getElementById("clear-a");
+            const clearB = document.getElementById("clear-b");
+            const clearBoth = document.getElementById("clear-both");
+
+            const leftTextarea = document.getElementById("left_content");
+            const rightTextarea = document.getElementById("right_content");
+            const form = document.getElementById("comparer-form");
+
+            if (loadSampleA) {
+                loadSampleA.addEventListener("click", () => {
+                    leftTextarea.value = SAMPLE_A_DATA;
+                });
+            }
+
+            if (loadSampleB) {
+                loadSampleB.addEventListener("click", () => {
+                    rightTextarea.value = SAMPLE_B_DATA;
+                });
+            }
+
+            const triggerDemo = () => {
+                leftTextarea.value = SAMPLE_A_DATA;
+                rightTextarea.value = SAMPLE_B_DATA;
+                form.submit();
+            };
+
+            if (loadBothSamples) {
+                loadBothSamples.addEventListener("click", triggerDemo);
+            }
+
+            if (runInitialDemo) {
+                runInitialDemo.addEventListener("click", triggerDemo);
+            }
+
+            if (clearA) {
+                clearA.addEventListener("click", () => leftTextarea.value = "");
+            }
+
+            if (clearB) {
+                clearB.addEventListener("click", () => rightTextarea.value = "");
+            }
+
+            if (clearBoth) {
+                clearBoth.addEventListener("click", () => {
+                    leftTextarea.value = "";
+                    rightTextarea.value = "";
+                });
+            }
+
+            // Initialize safe keys set
+            const safeKeysInput = document.getElementById("safe-keys-input");
+            if (safeKeysInput && safeKeysInput.value) {
+                safeKeysInput.value.split(",").forEach(k => {
+                    if (k.trim()) safeKeys.add(k.trim());
+                });
+            }
+
+            // Link input label changes immediately to grid headers
+            const leftLabelInput = document.querySelector("input[name='left_label']");
+            const rightLabelInput = document.querySelector("input[name='right_label']");
+            const headerLabelA = document.getElementById("header-label-a");
+            const headerLabelB = document.getElementById("header-label-b");
+            
+            if (leftLabelInput && headerLabelA) {
+                leftLabelInput.addEventListener("input", (e) => {
+                    headerLabelA.textContent = "Value in " + (e.target.value.trim() || "List A");
+                });
+            }
+            if (rightLabelInput && headerLabelB) {
+                rightLabelInput.addEventListener("input", (e) => {
+                    headerLabelB.textContent = "Value in " + (e.target.value.trim() || "List B");
+                });
+            }
+
+            // Client Side Filters for Results (Snappy, No-refresh filters)
+            const filterBtns = document.querySelectorAll(".tab-btn");
+            const searchInput = document.getElementById("search-filter");
+            const rows = document.querySelectorAll(".diff-row");
+
+            let currentFilter = "all";
+            let searchQuery = "";
+
+            const applyFilters = () => {
+                rows.forEach(row => {
+                    const rowStatus = row.dataset.status;
+                    const rowKey = row.dataset.key.toLowerCase();
+                    const isSilenced = row.classList.contains("silenced-row");
+                    const leftValNode = row.querySelector(".col-left-val .val-text");
+                    const rightValNode = row.querySelector(".col-right-val .val-text");
+                    
+                    const leftVal = leftValNode ? leftValNode.textContent.toLowerCase() : "";
+                    const rightVal = rightValNode ? rightValNode.textContent.toLowerCase() : "";
+
+                    // Filter match criteria
+                    let matchesFilter = false;
+                    if (currentFilter === "all") {
+                        matchesFilter = true;
+                    } else if (currentFilter === "silenced") {
+                        matchesFilter = isSilenced;
+                    } else {
+                        matchesFilter = !isSilenced && (rowStatus === currentFilter);
+                    }
+
+                    const matchesSearch = !searchQuery || 
+                                          rowKey.includes(searchQuery) || 
+                                          leftVal.includes(searchQuery) || 
+                                          rightVal.includes(searchQuery);
+
+                    if (matchesFilter && matchesSearch) {
+                        row.style.display = "";
+                    } else {
+                        row.style.display = "none";
+                    }
+                });
+            };
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener("click", () => {
+                    filterBtns.forEach(b => b.classList.remove("active"));
+                    btn.classList.add("active");
+                    currentFilter = btn.dataset.filter;
+                    applyFilters();
+                });
+            });
+
+            if (searchInput) {
+                searchInput.addEventListener("input", (e) => {
+                    searchQuery = e.target.value.toLowerCase().trim();
+                    applyFilters();
+                });
+            }
+
+            // Expose applyFilters globally for recalculation syncs
+            window.applyFilters = applyFilters;
+        });
+
+        // Toggle Mark Safe Handler
+        function toggleMarkSafe(key, btn) {
+            const row = btn.closest(".diff-row");
+            const isSilenced = row.classList.contains("silenced-row");
+            
+            if (isSilenced) {
+                // Unmark safe
+                row.classList.remove("silenced-row");
+                btn.classList.remove("safe");
+                btn.setAttribute("title", "Mark safe (silence intentional discrepancy)");
+                safeKeys.delete(key);
+                
+                // Restore original status badge text
+                const badge = row.querySelector(".status-badge");
+                const originalStatus = row.dataset.status.replace("_", " ");
+                badge.textContent = originalStatus;
+            } else {
+                // Mark safe
+                row.classList.add("silenced-row");
+                btn.classList.add("safe");
+                btn.setAttribute("title", "Mark active (remove safe silence)");
+                safeKeys.add(key);
+                
+                // Change badge text to safe
+                const badge = row.querySelector(".status-badge");
+                badge.textContent = "safe";
+            }
+            
+            // Sync with hidden input
+            const safeKeysInput = document.getElementById("safe-keys-input");
+            if (safeKeysInput) {
+                safeKeysInput.value = Array.from(safeKeys).join(",");
+            }
+            
+            // Recalculate stats dynamically
+            recalculateStats();
+            
+            // Reapply filters immediately in case of active filter tabs
+            if (window.applyFilters) {
+                window.applyFilters();
+            }
+        }
+
+        // Recalculate Stats
+        function recalculateStats() {
+            const rows = document.querySelectorAll(".diff-row");
+            let matches = 0;
+            let mismatches = 0;
+            let missingRight = 0;
+            let missingLeft = 0;
+            let safe = 0;
+            
+            rows.forEach(row => {
+                const isSilenced = row.classList.contains("silenced-row");
+                const status = row.dataset.status;
+                
+                if (isSilenced) {
+                    safe++;
+                } else {
+                    if (status === "match") matches++;
+                    else if (status === "mismatch") mismatches++;
+                    else if (status === "missing_right") missingRight++;
+                    else if (status === "missing_left") missingLeft++;
+                }
+            });
+            
+            // Update Stats Card Values
+            const elMatches = document.getElementById("stats-matches");
+            const elMismatches = document.getElementById("stats-mismatches");
+            const elMissingR = document.getElementById("stats-missing-r");
+            const elMissingL = document.getElementById("stats-missing-l");
+            const elSafe = document.getElementById("stats-safe");
+            
+            if (elMatches) elMatches.textContent = matches;
+            if (elMismatches) elMismatches.textContent = mismatches;
+            if (elMissingR) elMissingR.textContent = missingRight;
+            if (elMissingL) elMissingL.textContent = missingLeft;
+            if (elSafe) elSafe.textContent = safe;
+            
+            // Update Filter Tab Values
+            const tabAllSpan = document.querySelector(".tab-btn[data-filter='all'] span");
+            const tabMismatchSpan = document.querySelector(".tab-btn[data-filter='mismatch'] span");
+            const tabMissingRSpan = document.querySelector(".tab-btn[data-filter='missing_right'] span");
+            const tabMissingLSpan = document.querySelector(".tab-btn[data-filter='missing_left'] span");
+            const tabMatchSpan = document.querySelector(".tab-btn[data-filter='match'] span");
+            const tabSilencedSpan = document.querySelector(".tab-btn[data-filter='silenced'] span");
+            
+            if (tabAllSpan) tabAllSpan.textContent = matches + mismatches + missingRight + missingLeft + safe;
+            if (tabMismatchSpan) tabMismatchSpan.textContent = mismatches;
+            if (tabMissingRSpan) tabMissingRSpan.textContent = missingRight;
+            if (tabMissingLSpan) tabMissingLSpan.textContent = missingLeft;
+            if (tabMatchSpan) tabMatchSpan.textContent = matches;
+            if (tabSilencedSpan) tabSilencedSpan.textContent = safe;
+        }
+
+        // Copy Helper
+        function copyToClipboard(text, element) {
+            if (!text) return;
+            
+            // Prevent trigger on direct copy-button clicking redundancy
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById("clipboard-toast");
+                toast.classList.add("show");
+                
+                // Animate background glow of value container briefly
+                const origBg = element.style.background;
+                element.style.background = "rgba(52, 211, 153, 0.15)";
+                element.style.transition = "all 0.15s ease";
+
+                setTimeout(() => {
+                    toast.classList.remove("show");
+                    element.style.background = origBg;
+                }, 2000);
+            }).catch(err => {
+                console.error("Failed to copy text: ", err);
+            });
+        }
+    </script>
+</body>
+</html>

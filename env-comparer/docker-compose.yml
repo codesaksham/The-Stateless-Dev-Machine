@@ -1,0 +1,13 @@
+# -----------------------------------------------------------------------------
+#  EnvComparer Compose - Crafted with ♥ by codesaksham
+#  A premium developer utility to align, parse, and compare environment lists.
+#  Copyright (c) 2026 codesaksham. All rights reserved.
+# -----------------------------------------------------------------------------
+
+services:
+  env-comparer:
+    build: .
+    container_name: env-comparer
+    ports:
+      - "8090:8090"
+    restart: always
